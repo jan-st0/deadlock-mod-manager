@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-StorageManager::StorageManager(const std::string& path): dbPath(path), db(nullptr) {
+StorageManager::StorageManager(const std::string& path): db_path(path), db(nullptr) {
     
     if (sqlite3_open(path.c_str(), &db) != SQLITE_OK) {
         throw std::runtime_error("Failed to open DB");

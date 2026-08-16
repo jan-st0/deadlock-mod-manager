@@ -5,6 +5,7 @@
 #include <vector>
 #include <sqlite3.h>
 #include <string_view>
+#include <filesystem>
 
 struct Mod {
     int id;
@@ -81,10 +82,10 @@ private:
     struct sqlite3 *db;
 
     //May be used in later versions or for diagnostics
-    fs::path dbPath;
+    fs::path db_path;
 
 public:
-    StorageManager(const std::string& dbPath);
+    StorageManager(const std::string& db_path);
     ~StorageManager();
 
     std::vector<Mod> select_preset_by_name(const std::string& name);
