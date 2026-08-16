@@ -22,7 +22,7 @@ void FileManager::create_mod_from_path(std::string& name, fs::path& absolute_pat
     // TODO: add option to bundle multiple files into 1 mod
     fs::path mod_path = mod_dir / "0.vpk";
     fs::copy(absolute_path, mod_path, fs::copy_options::overwrite_existing);
-    Mod mod = {.name = name, .origin = "", .path = mod_path};
+    Mod mod = {.name = name, .origin = "", .path = mod_path.string()};
     db_cursor.create_mod(mod);
 }
 

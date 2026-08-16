@@ -11,7 +11,7 @@
 StorageManager::StorageManager(const std::string& path): dbPath(path), db(nullptr) {
     
     if (sqlite3_open(path.c_str(), &db) != SQLITE_OK) {
-        std::runtime_error("Failed to open DB");
+        throw std::runtime_error("Failed to open DB");
     }
 }
 
@@ -71,9 +71,9 @@ void StorageManager::create_mods_in_batch(std::vector<Mod>& mods) {
     for (auto& mod: mods) {
         sqlite3_bind_text(stmt, 1, mod.name.c_str(), static_cast<int>(mod.name.size()), SQLITE_STATIC);
 
-        sqlite3_bind_text(stmt, 1, mod.origin.c_str(), static_cast<int>(mod.origin.size()), SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 2, mod.origin.c_str(), static_cast<int>(mod.origin.size()), SQLITE_STATIC);
         
-        sqlite3_bind_text(stmt, 1, mod.path.c_str(), static_cast<int>(mod.path.size()), SQLITE_STATIC);
+        sqlite3_bind_text(stmt, 3, mod.path.c_str(), static_cast<int>(mod.path.size()), SQLITE_STATIC);
         if (sqlite3_step(stmt) != SQLITE_DONE) {
                     std::cerr << "Failed inserting record: " << sqlite3_errmsg(db) << '\n';
                     sqlite3_finalize(stmt);
@@ -190,7 +190,7 @@ std::vector<Mod> StorageManager::select_preset(const Preset& preset) {
     sqlite3_stmt *stmt = nullptr;
     
     const char* query_data = sql::select_preset.data();
-    int query_size = static_cast<int>(sql::select_preset_by_id.size());
+    int query_size = static_cast<int>(sql::select_preset.size());
     
     if (sqlite3_prepare_v2(db, query_data, query_size, &stmt, nullptr) != SQLITE_OK) {
         std::cerr << "Failed to prepare select statement: " << sqlite3_errmsg(db) << '\n';

@@ -81,7 +81,7 @@ private:
     struct sqlite3 *db;
 
     //May be used in later versions or for diagnostics
-    std::string_view dbPath;
+    fs::path dbPath;
 
 public:
     StorageManager(const std::string& dbPath);

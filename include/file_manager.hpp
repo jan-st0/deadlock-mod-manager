@@ -8,11 +8,12 @@
 namespace fs = std::filesystem;
 
 
-static void read_line_from_file(std::ifstream& file, std::string& line) {
+static bool read_line_from_file(std::ifstream& file, std::string& line) {
     std::getline(file, line);
     if (!line.empty() && line.back() == '\r') {
             line.pop_back();
     }
+    return true;
 }
 
 class FileManager{
@@ -26,7 +27,11 @@ private:
         std::ifstream file(cache_file);
         std::string line;
         read_line_from_file(file, line);
-        cache_preset.id = std::stoi(line);
+        if (read_line_from_file(file, line) && !line.empty()) {
+            try {
+                cache_preset.id = std::stoi(line);
+            } catch (...) { return; }
+        }
         read_line_from_file(file, line);
         cache_preset.name = line;
         file.close();
