@@ -40,7 +40,11 @@ CREATE TABLE Preset_Link (
     
     inline constexpr query create_preset = R"sql(
 INSERT INTO Presets (name) VALUES(?);
-    )sql";
+)sql";
+
+    inline constexpr query add_mod = R"sql(
+INSERT INTO Mods (name, origin, path) VALUES(?, ?, ?);
+)sql";
 }
 
 class StorageManager {
@@ -56,5 +60,5 @@ public:
     std::vector<Mod> selectPreset(const std::string& name);
     void initialize_schema();
     void create_preset(std::string_view name);
-    void create_mods(const std::vector<Mod>& mods);
+    void create_mods_in_batch(const std::vector<Mod>& mods);
 };
