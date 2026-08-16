@@ -18,7 +18,7 @@ static void read_line_from_file(std::ifstream& file, std::string& line) {
 class FileManager{
 private:
     fs::path base_mod_path = "./mods"; 
-    fs::path addons_folder = "C:/Steam/steamapps/common/Deadlock/game/citadel"; 
+    fs::path addons_folder = "C:/Steam/steamapps/common/Deadlock/game/citadel/addons"; 
     fs::path cache_file = "./last_preset.txt";
     Preset cache_preset;
 
@@ -41,8 +41,8 @@ private:
 public:
     FileManager();
     ~FileManager();
-    void copy_mod(std::string_view name, fs::path absolute_path);
-    void execute_preset(const Preset& preset, const StorageManager& db_cursor);
+    void create_mod_from_path(std::string& name, fs::path& absolute_path, StorageManager& db_cursor);
+    void load_preset_to_citadel(const Preset& preset, StorageManager& db_cursor);
 
     void set_addons_folder(fs::path new_addons) { addons_folder = std::move(new_addons); }
 

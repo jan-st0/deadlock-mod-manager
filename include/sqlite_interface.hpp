@@ -65,6 +65,15 @@ WHERE p.name = ?
 ORDER BY pl.load_order ASC;
 )sql";
 
+
+    inline constexpr query select_preset_by_id = R"sql(
+SELECT m.id, m.name, m.origin, m.path
+FROM Mods m
+JOIN Preset_Link pl ON m.id = pl.mod_id
+WHERE pl.preset_id = ?
+ORDER BY pl.load_order ASC;
+)sql";
+
 }
 
 class StorageManager {
@@ -80,10 +89,12 @@ public:
 
     std::vector<Mod> select_preset_by_name(const std::string& name);
 
-    std::vector<Mod> select_preset_by_id(int id);
+    std::vector<Mod> select_preset(const Preset& preset);
     void initialize_schema();
     std::optional<Preset> create_preset(std::string_view name);
     // returns updated mod vector with actual id for each mod
     void create_mods_in_batch(std::vector<Mod>& mods);
+
+    void create_mod(Mod& mod);
     void link_mods_to_preset(const std::vector<Mod>& mods, const Preset& preset);
 };

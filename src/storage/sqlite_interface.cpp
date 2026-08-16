@@ -89,8 +89,30 @@ void StorageManager::create_mods_in_batch(std::vector<Mod>& mods) {
     sqlite3_exec(db, "COMMIT;", nullptr, nullptr, nullptr);
 }
 
+void StorageManager::create_mod(Mod& mod) {
+    sqlite3_stmt *stmt = nullptr;
+    
+    if (sqlite3_prepare_v2(db, sql::add_mod.data(), 
+                static_cast<int>(sql::add_mod.size()), 
+                &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare insert statement: " << sqlite3_errmsg(db) << '\n';
+        return;
+    }
 
-
+    sqlite3_bind_text(stmt, 1, mod.name.c_str(), static_cast<int>(mod.name.size()), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, mod.origin.c_str(), static_cast<int>(mod.origin.size()), SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, mod.path.c_str(), static_cast<int>(mod.path.size()), SQLITE_STATIC);
+    
+    if (sqlite3_step(stmt) != SQLITE_DONE) {
+        std::cerr << "Failed inserting record: " << sqlite3_errmsg(db) << '\n';
+        sqlite3_finalize(stmt);
+        return;
+    }
+    
+    mod.id = static_cast<int>(sqlite3_last_insert_rowid(db));
+    
+    sqlite3_finalize(stmt);
+}
 
 void StorageManager::link_mods_to_preset(const std::vector<Mod>& mods, const Preset& preset) {
     if (mods.empty()) return;
@@ -161,4 +183,42 @@ std::vector<Mod> StorageManager::select_preset_by_name(const std::string& name) 
     sqlite3_finalize(stmt);
 
     return mods;
+}
+
+std::vector<Mod> StorageManager::select_preset(const Preset& preset) {
+    std::vector<Mod> mods;
+    sqlite3_stmt *stmt = nullptr;
+    
+    const char* query_data = sql::select_preset.data();
+    int query_size = static_cast<int>(sql::select_preset_by_id.size());
+    
+    if (sqlite3_prepare_v2(db, query_data, query_size, &stmt, nullptr) != SQLITE_OK) {
+        std::cerr << "Failed to prepare select statement: " << sqlite3_errmsg(db) << '\n';
+        return mods;
+    }
+
+    sqlite3_bind_text(stmt, 1, preset.name.data(), static_cast<int>(preset.name.size()), SQLITE_STATIC);
+
+    while(sqlite3_step(stmt) == SQLITE_ROW) {
+        Mod mod;
+        mod.id = sqlite3_column_int(stmt, 0); 
+        
+        if (const unsigned char* name_txt = sqlite3_column_text(stmt, 1)) {
+            mod.name = reinterpret_cast<const char*>(name_txt);
+        }
+        
+        if (const unsigned char* origin_txt = sqlite3_column_text(stmt, 2)) {
+            mod.origin = reinterpret_cast<const char*>(origin_txt);
+        }
+        
+        if (const unsigned char* path_txt = sqlite3_column_text(stmt, 3)) {
+            mod.path = reinterpret_cast<const char*>(path_txt);
+        }
+        
+        mods.push_back(std::move(mod));
+    }
+    sqlite3_finalize(stmt);
+
+    return mods;
+
 }
