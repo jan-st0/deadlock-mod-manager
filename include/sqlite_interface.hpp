@@ -79,6 +79,8 @@ public:
     ~StorageManager();
 
     std::vector<Mod> select_preset_by_name(const std::string& name);
+
+    std::vector<Mod> select_preset_by_id(int id);
     void initialize_schema();
     std::optional<Preset> create_preset(std::string_view name);
     // returns updated mod vector with actual id for each mod
