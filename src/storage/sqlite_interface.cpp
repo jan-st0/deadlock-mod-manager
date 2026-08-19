@@ -222,3 +222,22 @@ std::vector<Mod> StorageManager::select_preset(const Preset& preset) {
     return mods;
 
 }
+
+std::vector<Mod> StorageManager::select_all_mods() {
+    std::vector<Mod> mods;
+    sqlite3_stmt *stmt = nullptr;
+    const char* query = "SELECT id, name, origin, path FROM Mods;";
+    
+    if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) return mods;
+
+    while(sqlite3_step(stmt) == SQLITE_ROW) {
+        Mod mod;
+        mod.id = sqlite3_column_int(stmt, 0);
+        if (auto txt = sqlite3_column_text(stmt, 1)) mod.name = reinterpret_cast<const char*>(txt);
+        if (auto txt = sqlite3_column_text(stmt, 2)) mod.origin = reinterpret_cast<const char*>(txt);
+        if (auto txt = sqlite3_column_text(stmt, 3)) mod.path = reinterpret_cast<const char*>(txt);
+        mods.push_back(std::move(mod));
+    }
+    sqlite3_finalize(stmt);
+    return mods;
+}

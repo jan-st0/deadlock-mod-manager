@@ -82,7 +82,7 @@ private:
     struct sqlite3 *db;
 
     //May be used in later versions or for diagnostics
-    fs::path db_path;
+    std::filesystem::path db_path;
 
 public:
     StorageManager(const std::string& db_path);
@@ -98,4 +98,5 @@ public:
 
     void create_mod(Mod& mod);
     void link_mods_to_preset(const std::vector<Mod>& mods, const Preset& preset);
+    std::vector<Mod> select_all_mods();
 };

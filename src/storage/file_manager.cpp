@@ -15,15 +15,14 @@ FileManager::~FileManager() {
     send_preset_to_cache();
 }
 
-void FileManager::create_mod_from_path(std::string& name, fs::path& absolute_path, StorageManager& db_cursor) {
+fs::path FileManager::save_mod_to_archive(std::string& name, fs::path& absolute_path) {
     // TODO: handle mod names conflict or mod update
     fs::path mod_dir = base_mod_path / name.data();
     fs::create_directory(mod_dir);
     // TODO: add option to bundle multiple files into 1 mod
     fs::path mod_path = mod_dir / "0.vpk";
     fs::copy(absolute_path, mod_path, fs::copy_options::overwrite_existing);
-    Mod mod = {.name = name, .origin = "", .path = mod_path.string()};
-    db_cursor.create_mod(mod);
+    return mod_path;
 }
 
 inline void clean_addon_dir(const fs::path& addon_folder_path) {
@@ -31,12 +30,12 @@ inline void clean_addon_dir(const fs::path& addon_folder_path) {
     fs::create_directory(addon_folder_path);
 }
 
-void FileManager::load_preset_to_citadel(const Preset& preset, StorageManager& db_cursor) {
-    std::vector<Mod> mods = db_cursor.select_preset(preset);
+
+void FileManager::load_preset_to_citadel(const std::vector<Mod>& preset) {
     clean_addon_dir(addons_folder);
     int prefix = 0;
     std::string filename;
-    for (const auto& mod: mods) {
+    for (const auto& mod: preset) {
         filename = std::format("pak{:02d}_dir.vpk", prefix);
         fs::copy(mod.path, addons_folder / filename);
         prefix++;

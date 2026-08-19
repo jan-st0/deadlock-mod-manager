@@ -8,8 +8,8 @@
 namespace fs = std::filesystem;
 
 
-static bool read_line_from_file(std::ifstream& file, std::string& line) {
-    std::getline(file, line);
+static inline bool read_line_from_file(std::ifstream& file, std::string& line) {
+    if (!std::getline(file, line)) return false;
     if (!line.empty() && line.back() == '\r') {
             line.pop_back();
     }
@@ -19,14 +19,14 @@ static bool read_line_from_file(std::ifstream& file, std::string& line) {
 class FileManager{
 private:
     fs::path base_mod_path = "./mods"; 
-    fs::path addons_folder = "C:/Steam/steamapps/common/Deadlock/game/citadel/addons"; 
+    // "C:/Steam/steamapps/common/Deadlock/game/citadel/addons"; 
+    fs::path addons_folder = "./test_addons"; 
     fs::path cache_file = "./last_preset.txt";
     Preset cache_preset;
 
     void load_last_preset_from_cache() {
         std::ifstream file(cache_file);
         std::string line;
-        read_line_from_file(file, line);
         if (read_line_from_file(file, line) && !line.empty()) {
             try {
                 cache_preset.id = std::stoi(line);
@@ -46,9 +46,9 @@ private:
 public:
     FileManager();
     ~FileManager();
-    void create_mod_from_path(std::string& name, fs::path& absolute_path, StorageManager& db_cursor);
-    void load_preset_to_citadel(const Preset& preset, StorageManager& db_cursor);
+    fs::path save_mod_to_archive(std::string& name, fs::path& absolute_path);
 
+    void FileManager::load_preset_to_citadel(const std::vector<Mod>& preset);
     void set_addons_folder(fs::path new_addons) { addons_folder = std::move(new_addons); }
 
     const Preset& get_last_preset() const { return cache_preset;}
